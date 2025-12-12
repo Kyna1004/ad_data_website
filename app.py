@@ -127,10 +127,6 @@ FIELD_ALIASES = {
 
 
 # ==========================================
-# PART 2: 核心工具函数 (保持不变，略)
-# ==========================================
-
-# ==========================================
 # PART 2: 核心工具函数 (已修复百分比识别问题)
 # ==========================================
 
@@ -201,7 +197,7 @@ def find_column_fuzzy(df, keywords):
             if kw.lower() in col_lower: return col
     return None
 
-# 核心指标计算 (保持不变)
+# 核心指标计算
 def calc_metrics_dict(df_chunk):
     res = {}
     if df_chunk.empty: return res
@@ -281,8 +277,6 @@ def extract_benchmark_values(df_bench):
                 if not pd.isna(v): extracted[metric] = [v, higher_better]
             except: pass
     return extracted
-
-# ... (add_hyperlink, apply_report_labels, add_df_to_word 保持不变)
 
 def add_hyperlink(paragraph, url, text, color="0000FF", underline=True):
     try:
@@ -426,7 +420,7 @@ class AdReportProcessor:
         self.doc.add_heading('广告投放深度分析报告', 0).alignment = WD_ALIGN_PARAGRAPH.CENTER
         self.final_json = {"report_title": "广告投放深度分析报告", "generated_at": pd.Timestamp.now().strftime("%Y-%m-%d")}
 
-        # 1. 大盘总览 (保持不变)
+        # 1. 大盘总览
         df_ov = pd.DataFrame()
         if "Master_Overview" in self.merged_dfs:
             df_src = self.merged_dfs["Master_Overview"]
@@ -536,7 +530,7 @@ class AdReportProcessor:
                     add_df_to_word(self.doc, df_display, title, level=2)
                     self.final_json['3_audience_analysis'][title] = df_clean.to_dict(orient='records')
 
-        # 4. 素材与落地页 (保持不变)
+        # 4. 素材与落地页
         if "Master_Creative" in self.merged_dfs:
             df_cr = self.merged_dfs["Master_Creative"]
             for title, keywords, label, json_key in [("4. 素材分析", ["素材", "Creative"], "素材名称", "4_creative_analysis"), ("6. 落地页分析", ["落地页", "Landing"], "落地页 URL", "6_landing_page_analysis")]:
@@ -567,7 +561,7 @@ class AdReportProcessor:
                     add_df_to_word(self.doc, df_display, title, level=1)
                     self.final_json[json_key] = df_clean.to_dict(orient='records')
                     
-        # 5. 版位 (保持不变)
+        # 5. 版位
         if "Master_Breakdown" in self.merged_dfs:
              self.doc.add_heading("5. 版位分析", level=1)
              df_bd = self.merged_dfs["Master_Breakdown"]
@@ -595,7 +589,7 @@ class AdReportProcessor:
                  add_df_to_word(self.doc, apply_report_labels(df_pot, {'dimension_item': '版位'}), "5.2 版位高潜力", level=2)
                  self.final_json['5_placement_analysis'] = {"top_spend": df_top5.to_dict('records'), "high_potential": df_pot.to_dict('records')}
 
-        # 7. 架构诊断 (保持不变)
+        # 7. 架构诊断
         rows = []
         if "Master_Overview" in self.merged_dfs:
              metrics = calc_metrics_dict(self.merged_dfs["Master_Overview"])
@@ -632,30 +626,10 @@ class AdReportProcessor:
              self.final_json['7_structure_analysis'] = df_struct.to_dict(orient='records')
 
 # ==========================================
-# PART 4: Streamlit UI (保持不变)
+# PART 4: Streamlit UI
 # ==========================================
-# --- MOCK CLASS FOR DEMONSTRATION (请在实际项目中替换为您的真实引用) ---
-# 实际代码中请删除此类，并使用: from your_module import AdReportProcessor
-class AdReportProcessor:
-    def __init__(self, raw, bench):
-        self.raw = raw
-        self.bench = bench
-        self.merged_dfs = {
-            "Master_Data": pd.DataFrame({'Campaign': ['C1', 'C2'], 'Cost': [100, 200]}),
-            "Analysis": pd.DataFrame({'Metric': ['A', 'B'], 'Value': [0.5, 0.8]})
-        }
-        self.final_json = {"status": "success", "data": "mock_data"}
-        # Mocking a Word document object
-        self.doc = io.BytesIO(b"Fake Word Content")
-        self.doc.save = lambda x: x.write(b"Fake Word Content")
-
-    def process_etl(self):
-        import time  # Locally import to prevent NameError if missing globally
-        time.sleep(1.5) # Simulate processing time
-
-    def generate_report(self):
-        import time  # Locally import to prevent NameError if missing globally
-        time.sleep(1.0) # Simulate processing time
+# ⚠️ 注意：已删除原有的 Mock Class (模拟类)，
+# 这样 main() 函数就会调用 PART 3 中定义的真实的 AdReportProcessor。
 # -------------------------------------------------------------------
 
 def main():
