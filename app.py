@@ -779,7 +779,7 @@ class MockProcessor:
 # 🚀 主程序
 # ==========================================
 def main():
-    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="✨")
+    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="📊")
     set_aurora_style()
 
     # --- Header (高度居中，模仿搜索页) ---
@@ -787,7 +787,7 @@ def main():
     st.markdown("<br>", unsafe_allow_html=True)
     
     st.title("What can I help with?")
-    st.markdown('<div class="subtitle">请上传您的数据报表，我将为您生成全维度的分析报告。</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">请上传您的【周期性复盘报告】、【行业benchmark】数据文件，我将为您生成处理后的【数据终表】。</div>', unsafe_allow_html=True)
 
     # --- Upload Area (模仿卡片布局) ---
     # 使用 columns 来限制宽度，保持中央聚焦感
@@ -818,7 +818,7 @@ def main():
             processor = MockProcessor(f1, f2)
             
             # 极简状态显示
-            with st.status("正在进行 AI 分析...", expanded=True) as status:
+            with st.status("正在进行数据处理...", expanded=True) as status:
                 st.write("提取关键指标...")
                 time.sleep(0.8)
                 st.write("生成架构洞察...")
