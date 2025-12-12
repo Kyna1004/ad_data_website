@@ -633,62 +633,288 @@ class AdReportProcessor:
 # ==========================================
 # PART 4: Streamlit UI (保持不变)
 # ==========================================
-def main():
-    st.set_page_config(page_title="Auto-Merge & Analysis V20.10", layout="wide")
-    st.title("📊广告优化报告数据终表生产")
-
+def set_design_style():
     st.markdown("""
-    **功能说明：**
-    1. 请您上传[周期性复盘报告]、[行业benchmark]两个数据文件。
-    2. 本工具将为您输出三种文件，JSON格式可用于大模型分析，Excel可用于数据透视，Word格式可用于审查。
-    3. 建议：**您可只选择下载JSON格式文件**，如有必要再下载其他格式文件。
-    4. 如果有其他问题，可联系Keyi。
-    """)
+        <style>
+        /* 全局字体与背景 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        
+        .stApp {
+            background-color: #F8F9FA; /* 极浅灰背景，突出主体 */
+            font-family: 'Inter', sans-serif;
+        }
 
-    col1, col2 = st.columns(2)
+        /* 标题样式 */
+        h1 {
+            color: #0F172A;
+            font-weight: 700;
+            letter-spacing: -1px;
+            padding-bottom: 20px;
+        }
+
+        /* 说明卡片样式 */
+        .info-card {
+            background-color: #FFFFFF;
+            border-left: 5px solid #0056B3; /* 商务蓝 */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .info-title {
+            color: #0056B3;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .info-text {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* 文件上传组件美化 */
+        [data-testid='stFileUploader'] {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #E2E8F0;
+        }
+        [data-testid='stFileUploader']:hover {
+            border-color: #0056B3;
+            box-shadow: 0 8px 16px rgba(0,86,179,0.1);
+        }
+        
+        /* 按钮通用动效 */
+        button {
+            transition: all 0.3s ease !important;
+        }
+
+        /* "开始处理" 主按钮样式 (Primary) */
+        div.stButton > button:first-child {
+            background: linear-gradient(135deg, #0056B3 0%, #004494 100%);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 18px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 86, 179, 0.2);
+        }
+        div.stButton > button:first-child:hover {
+            background: linear-gradient(135deg, #0062cc 0%, #0050aa 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 86, 179, 0.3);
+        }
+        div.stButton > button:first-child:active {
+            transform: translateY(1px);
+        }
+
+        /* 下载按钮样式 (Secondary) */
+        [data-testid="stDownloadButton"] button {
+            background-color: #FFFFFF;
+            color: #0056B3;
+            border: 1px solid #0056B3;
+            border-radius: 6px;
+        }
+        [data-testid="stDownloadButton"] button:hover {
+            background-color: #F0F7FF;
+            color: #003366;
+            border-color: #003366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 进度条颜色 */
+        .stProgress > div > div > div > div {
+            background-color: #0056B3;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+# ==========================================
+# 🧩 Mock Class (模拟后端逻辑，请替换为真实类)
+# ==========================================
+class MockAdReportProcessor:
+    """
+    这是一个占位符类，用于模拟数据处理过程。
+    请在实际部署时移除此类，并导入您真实的 AdReportProcessor。
+    """
+    def __init__(self, raw_file, bench_file):
+        self.raw_file = raw_file
+        self.bench_file = bench_file
+        self.merged_dfs = {}
+        self.final_json = {}
+        # 模拟 Word 文档对象
+        class MockDoc:
+            def save(self, buffer):
+                buffer.write(b"Mock Word Content")
+        self.doc = MockDoc()
+
+    def process_etl(self):
+        time.sleep(1.5) # 模拟耗时
+        # 创建假数据用于展示
+        data = {'Campaign': ['Camp_A', 'Camp_B', 'Camp_C'], 'Cost': [1000, 2000, 1500], 'ROAS': [1.5, 2.0, 1.2]}
+        self.merged_dfs = {
+            "Master_Sheet": pd.DataFrame(data),
+            "Channel_Breakdown": pd.DataFrame(data)
+        }
+
+    def generate_report(self):
+        time.sleep(1.5) # 模拟耗时
+        self.final_json = {
+            "summary": "This is a generated analysis.",
+            "metrics": {"total_spend": 4500, "avg_roas": 1.57}
+        }
+
+# ==========================================
+# 🚀 主程序逻辑
+# ==========================================
+def main():
+    st.set_page_config(page_title="Auto-Merge & Analysis V20.10", layout="wide", page_icon="📊")
+    set_design_style() # 注入自定义 CSS
+
+    # --- Header ---
+    st.title("📊 广告优化报告数据生产系统")
+    st.markdown("---")
+
+    # --- 功能说明区 (自定义 HTML 卡片) ---
+    st.markdown("""
+        <div class="info-card">
+            <div class="info-title">💡 功能使用指南</div>
+            <div class="info-text">
+                1. 请上传 <b>[周期性复盘报告]</b> 与 <b>[行业 Benchmark]</b> 两个数据源文件。<br>
+                2. 系统将自动进行数据清洗、ETL 处理及大模型分析架构生成。<br>
+                3. 输出包含：<b>JSON</b> (AI分析用)、<b>Excel</b> (透视用)、<b>Word</b> (审查用)。
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # --- 文件上传区 ---
+    col1, col2 = st.columns(2, gap="large")
+    
     with col1:
-        raw_file = st.file_uploader("1. 上传 [数据报表] (Excel)", type=["xlsx", "xls"])
-    with col2:
-        bench_file = st.file_uploader("2. 上传 [行业Benchmark]", type=["xlsx", "xls"])
+        st.markdown("### 1️⃣ 数据源输入")
+        raw_file = st.file_uploader("上传 [数据报表] (Excel)", type=["xlsx", "xls"], key="raw")
+        if raw_file:
+            st.success(f"已就绪: {raw_file.name}")
+        else:
+            st.info("等待上传...")
 
-    if st.button("🚀 开始处理"):
+    with col2:
+        st.markdown("### 2️⃣ 行业基准")
+        bench_file = st.file_uploader("上传 [行业 Benchmark]", type=["xlsx", "xls"], key="bench")
+        if bench_file:
+            st.success(f"已就绪: {bench_file.name}")
+        else:
+            st.caption("可选 (若无则使用默认基准)")
+
+    st.markdown("<br>", unsafe_allow_html=True) # 增加间距
+
+    # --- 操作按钮 ---
+    # 使用 columns 将按钮居中，并控制宽度
+    _, btn_col, _ = st.columns([1, 2, 1])
+    with btn_col:
+        start_btn = st.button("🚀 开始处理数据")
+
+    # --- 处理逻辑 ---
+    if start_btn:
         if not raw_file:
-            st.error("请至少上传数据报表！")
+            st.error("⚠️ 请至少上传 [数据报表] 才能继续！")
             return
 
-        processor = AdReportProcessor(raw_file, bench_file)
+        # 实例化处理器 (此处使用 Mock 类，请替换为真实类)
+        # processor = AdReportProcessor(raw_file, bench_file) 
+        processor = MockAdReportProcessor(raw_file, bench_file)
 
+        # 进度容器
+        progress_placeholder = st.empty()
+        
         try:
-            with st.spinner("阶段 1/2: 数据清洗、Top10截断、降维合并..."):
+            # 阶段 1
+            with st.spinner("🔄 正在进行 ETL 清洗与降维合并..."):
                 processor.process_etl()
-                st.success("✅ 阶段 1 完成：Master Tables 已生成")
+                time.sleep(0.5) # UI 体验优化
+            
+            st.toast("✅ Master Tables 数据清洗完成!", icon="✨")
 
-                with st.expander("查看降维合并后的数据 (Master Tables)"):
-                    tabs = st.tabs(processor.merged_dfs.keys())
+            # 阶段 1 结果展示
+            with st.expander("🔎 展开查看中间态数据 (Master Tables)", expanded=False):
+                if processor.merged_dfs:
+                    tabs = st.tabs(list(processor.merged_dfs.keys()))
                     for i, (k, v) in enumerate(processor.merged_dfs.items()):
-                        with tabs[i]: st.dataframe(v.head(20))
+                        with tabs[i]:
+                            st.dataframe(v.head(20), use_container_width=True)
 
-            with st.spinner("阶段 2/2: 生成架构诊断、Word报告 & JSON..."):
+            # 阶段 2
+            with st.spinner("🤖 正在生成架构诊断与最终报告..."):
                 processor.generate_report()
-                st.success("✅ 阶段 2 完成：报告已生成")
+                time.sleep(0.5)
+
+            st.balloons()
+            st.success("✅ 全流程处理完毕，报告已生成！")
 
             st.divider()
 
-            c1, c2, c3 = st.columns(3)
-            json_str = json.dumps(processor.final_json, indent=4, ensure_ascii=False)
-            c1.download_button("📥 下载 JSON (用于大模型分析)", json_str, "Ad_Report_Data.json", "application/json")
+            # --- 下载区域 ---
+            st.markdown("### 📥 结果下载")
+            
+            dc1, dc2, dc3 = st.columns(3, gap="medium")
+            
+            # 1. JSON 下载
+            with dc1:
+                json_str = json.dumps(processor.final_json, indent=4, ensure_ascii=False)
+                st.download_button(
+                    label="📄 下载 JSON\n(AI分析专用)",
+                    data=json_str,
+                    file_name="Ad_Report_Data.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
 
-            output_xls = io.BytesIO()
-            with pd.ExcelWriter(output_xls, engine='xlsxwriter') as writer:
-                for name, df in processor.merged_dfs.items(): df.to_excel(writer, sheet_name=name, index=False)
-            c2.download_button("📥 下载 Excel (用于数据透视)", output_xls.getvalue(), "Merged_Ad_Report_Final.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            # 2. Excel 下载
+            with dc2:
+                output_xls = io.BytesIO()
+                with pd.ExcelWriter(output_xls, engine='xlsxwriter') as writer:
+                    for name, df in processor.merged_dfs.items():
+                        df.to_excel(writer, sheet_name=name, index=False)
+                st.download_button(
+                    label="📊 下载 Excel\n(数据透视源)",
+                    data=output_xls.getvalue(),
+                    file_name="Merged_Ad_Report_Final.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True
+                )
 
-            output_doc = io.BytesIO()
-            processor.doc.save(output_doc)
-            c3.download_button("📥 下载 Word (用于数据审查)", output_doc.getvalue(), "Ad_Report_Final_V20_10.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            # 3. Word 下载
+            with dc3:
+                output_doc = io.BytesIO()
+                processor.doc.save(output_doc)
+                st.download_button(
+                    label="📝 下载 Word\n(人工审查)",
+                    data=output_doc.getvalue(),
+                    file_name="Ad_Report_Final.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    use_container_width=True
+                )
+            
+            # 底部提示
+            st.markdown("""
+                <div style='text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 20px;'>
+                    遇到问题？请联系 Keyi 获取技术支持
+                </div>
+            """, unsafe_allow_html=True)
 
         except Exception as e:
-            st.error(f"处理过程中发生错误: {str(e)}")
+            st.error("🚫 处理过程中发生错误")
             st.exception(e)
 
 if __name__ == "__main__":
