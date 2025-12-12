@@ -9,8 +9,6 @@ Original file is located at
 # **广告优化报告网页**
 """
 
-!pip install xlsxwriter python-docx streamlit
-
 import streamlit as st
 import pandas as pd
 import numpy as np
