@@ -181,7 +181,11 @@ def calc_metrics_dict(df_chunk):
     res['cpm'] = (sums['spend'] / (sums['impressions'] + eps)) * 1000
     res['cpc'] = sums['spend'] / (sums['clicks'] + eps)
     res['ctr'] = sums['clicks'] / (sums['impressions'] + eps)
-    res['cpa'] = sums['spend'] / (sums['purchases'] + eps)
+    def calculate_cpa(spend, purchases):
+    if purchases > 0:
+        return spend / purchases
+    else:
+        return 0.0 
     res['cvr_purchase'] = sums['purchases'] / (sums['clicks'] + eps)
     res['rate_click_to_lp'] = sums['landing_page_views'] / (sums['clicks'] + eps)
     res['rate_lp_to_atc'] = sums['add_to_cart'] / (sums['landing_page_views'] + eps)
