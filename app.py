@@ -842,7 +842,7 @@ def main():
     # --- Header Section ---
     st.markdown('<div class="main-title">What can I help with?</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="sub-title">请分别上传您的【周期性复盘报告】、【行业benchmark】数据文件，我将为您生成处理后的【数据终表】。</div>', 
+        '<div class="sub-title">请分别上传您的【周期性复盘报告】、【行业benchmark】数据文件，我将为您生成专业准确的广告优化【数据终表】。</div>', 
         unsafe_allow_html=True
     )
 
