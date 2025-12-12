@@ -853,13 +853,13 @@ def main():
         # Use container with border to mimic the card look
         with st.container(border=True):
             st.markdown('<div class="icon-container">📊</div>', unsafe_allow_html=True)
-            st.markdown('<div class="card-header">上传数据报表 (Excel)</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-header">1.上传[周期性复盘报告]</div>', unsafe_allow_html=True)
             raw_file = st.file_uploader("", type=["xlsx", "xls"], key="raw_uploader", label_visibility="collapsed")
 
     with col2:
         with st.container(border=True):
             st.markdown('<div class="icon-container">🎯</div>', unsafe_allow_html=True)
-            st.markdown('<div class="card-header">上传行业 Benchmark</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-header">2.上传[行业 Benchmark]</div>', unsafe_allow_html=True)
             bench_file = st.file_uploader("", type=["xlsx", "xls"], key="bench_uploader", label_visibility="collapsed")
 
     st.write("") # Spacer
