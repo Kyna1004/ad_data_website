@@ -639,18 +639,18 @@ def main():
 
             # 1. JSON (Gemini)
             json_str = json.dumps(processor.final_json, indent=4, ensure_ascii=False)
-            c1.download_button("📥 下载 JSON (Gemini用)", json_str, "Ad_Report_Data.json", "application/json")
+            c1.download_button("📥 下载 JSON (用于大模型分析)", json_str, "Ad_Report_Data.json", "application/json")
 
             # 2. Excel (Merged Data)
             output_xls = io.BytesIO()
             with pd.ExcelWriter(output_xls, engine='xlsxwriter') as writer:
                 for name, df in processor.merged_dfs.items(): df.to_excel(writer, sheet_name=name, index=False)
-            c2.download_button("📥 下载 Excel (合并后数据)", output_xls.getvalue(), "Merged_Ad_Report_Final.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            c2.download_button("📥 下载 Excel (用于数据透视)", output_xls.getvalue(), "Merged_Ad_Report_Final.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
             # 3. Word (Report)
             output_doc = io.BytesIO()
             processor.doc.save(output_doc)
-            c3.download_button("📥 下载 Word (最终报告)", output_doc.getvalue(), "Ad_Report_Final_V20_10.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            c3.download_button("📥 下载 Word (用于数据审查)", output_doc.getvalue(), "Ad_Report_Final_V20_10.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
         except Exception as e:
             st.error(f"处理过程中发生错误: {str(e)}")
