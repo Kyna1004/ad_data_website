@@ -828,15 +828,12 @@ class MockProcessor:
 # 🚀 主程序
 # ==========================================
 def main():
-    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="🎨")
+    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="📊")
     set_artistic_style()
 
     # --- Header ---
     c1, c2 = st.columns([0.1, 0.9])
     with c1:
-        # 使用 emoji 模拟图标，放大处理
-        st.markdown("<div style='font-size: 3.5rem; line-height: 1.2;'>📊</div>", unsafe_allow_html=True)
-    with c2:
         st.title("广告优化报告数据生产系统")
     
     # 艺术分割线
