@@ -633,182 +633,72 @@ class AdReportProcessor:
 # ==========================================
 # PART 4: Streamlit UI (保持不变)
 # ==========================================
-def set_aurora_style():
-    st.markdown("""
-        <style>
-        /* 1. 字体引入: Inter (类似 Apple/Notion 的干净字体) */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
-        
-        /* 2. 全局背景：极光氛围 */
-        .stApp {
-            background-color: #FFFFFF;
-            font-family: 'Inter', sans-serif;
-            color: #1a1a1a;
-        }
-        
-        /* 添加背景光晕 - 使用伪元素模拟模糊的彩色光斑 */
-        .stApp::before {
-            content: "";
-            position: fixed;
-            top: -10vh;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80vw;
-            height: 60vh;
-            background: radial-gradient(circle, rgba(255,220,150,0.4) 0%, rgba(255,190,200,0.3) 40%, rgba(230,200,250,0.2) 70%, rgba(255,255,255,0) 100%);
-            filter: blur(80px);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* 3. 标题样式 - 居中 & 渐变 */
-        h1 {
-            text-align: center;
-            font-weight: 800;
-            font-size: 3.5rem !important;
-            letter-spacing: -1.5px;
-            background: linear-gradient(135deg, #2D1B69, #9F4F8A, #FF8F70);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-top: 40px;
-            margin-bottom: 10px;
-        }
-        
-        /* 副标题/说明文字 */
-        .subtitle {
-            text-align: center;
-            color: #8E8E93; /* 苹果灰 */
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin-bottom: 60px;
-        }
-
-        /* 4. 文件上传卡片 - 模仿参考图中的 "Cards" */
-        /* 重塑上传组件的外观 */
-        [data-testid='stFileUploader'] {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 24px; /* 超大圆角 */
-            padding: 20px;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); /* 极柔和阴影 */
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            text-align: center;
-        }
-        
-        [data-testid='stFileUploader']:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.12);
-            border-color: rgba(200,200,255,0.5);
-        }
-
-        [data-testid='stFileUploader'] label {
-            justify-content: center;
-            font-size: 1rem;
-            color: #555;
-            font-weight: 600;
-        }
-
-        [data-testid='stFileUploader'] button {
-            background: #F2F2F7;
-            border: none;
-            color: #1a1a1a;
-            border-radius: 12px;
-            padding: 8px 16px;
-            font-weight: 600;
-        }
-
-        /* 5. 按钮 - 居中胶囊 */
-        div.stButton > button:first-child {
-            background: #1a1a1a; /* 极简黑 */
-            color: white;
-            border: none;
-            padding: 16px 48px;
-            font-size: 16px;
-            border-radius: 100px; /* 完全胶囊形 */
-            font-weight: 600;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
-            display: block;
-            margin: 0 auto;
-        }
-        div.stButton > button:first-child:hover {
-            background: #333;
-            transform: scale(1.05);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-        }
-
-        /* 6. 下载区域微调 */
-        [data-testid="stDownloadButton"] button {
-            background: white;
-            border: 1px solid #E5E5E5;
-            border-radius: 16px;
-            color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        }
-        
-        /* 进度条 */
-        .stProgress > div > div > div > div {
-            background: linear-gradient(90deg, #FF8F70, #9F4F8A);
-        }
-        
-        /* 隐藏顶部默认装饰条 */
-        header {visibility: hidden;}
-        </style>
-    """, unsafe_allow_html=True)
-
-# ==========================================
-# 🧩 Mock Logic
-# ==========================================
-class MockProcessor:
-    def __init__(self, raw, bench):
-        self.raw = raw
-        self.bench = bench
-        self.merged_dfs = {}
-        self.final_json = {}
-        class MockDoc:
-            def save(self, b): b.write(b"content")
-        self.doc = MockDoc()
-
-    def run_pipeline(self):
-        time.sleep(1.5)
-        self.merged_dfs = {"Overview": pd.DataFrame({'Metric': [1,2], 'Value': [3,4]})}
-        self.final_json = {"status": "success"}
-
-# ==========================================
-# 🚀 主程序
-# ==========================================
 def main():
-    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="📊")
-    set_aurora_style()
+    st.set_page_config(page_title="Auto-Merge & Analysis V20.10", layout="wide")
+    st.title("📊广告优化报告数据终表生产")
 
-    # --- Header (高度居中，模仿搜索页) ---
-    # 使用空的 container 增加顶部留白，让内容视觉居中
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    st.title("What can I help with?")
-    st.markdown('<div class="subtitle">请上传您的【周期性复盘报告】、【行业benchmark】数据文件，我将为您生成处理后的【数据终表】。</div>', unsafe_allow_html=True)
+    st.markdown("""
+    **功能说明：**
+    1. 请您上传[周期性复盘报告]、[行业benchmark]两个数据文件。
+    2. 本工具将为您输出三种文件，JSON格式可用于大模型分析，Excel可用于数据透视，Word格式可用于审查。
+    3. 建议：**您可只选择下载JSON格式文件**，如有必要再下载其他格式文件。
+    4. 如果有其他问题，可联系Keyi。
+    """)
 
-    # --- Upload Area (模仿卡片布局) ---
-    # 使用 columns 来限制宽度，保持中央聚焦感
-    # 比例：空 - 卡片1 - 间隔 - 卡片2 - 空
-    c_pad1, c_card1, c_gap, c_card2, c_pad2 = st.columns([1, 4, 0.5, 4, 1])
+    col1, col2 = st.columns(2)
+    with col1:
+        raw_file = st.file_uploader("1. 上传 [数据报表] (Excel)", type=["xlsx", "xls"])
+    with col2:
+        bench_file = st.file_uploader("2. 上传 [行业Benchmark]", type=["xlsx", "xls"])
 
-    with c_card1:
-        # 添加图标装饰
-        st.markdown("<div style='text-align:center; font-size:2rem; margin-bottom:10px;'>📊</div>", unsafe_allow_html=True)
-        f1 = st.file_uploader("上传数据报表 (Excel)", type=["xlsx", "xls"], key="f1")
+    if st.button("🚀 开始处理"):
+        if not raw_file:
+            st.error("请至少上传数据报表！")
+            return
 
-    with c_card2:
-        st.markdown("<div style='text-align:center; font-size:2rem; margin-bottom:10px;'>🎯</div>", unsafe_allow_html=True)
-        f2 = st.file_uploader("上传行业 Benchmark", type=["xlsx", "xls"], key="f2")
+        processor = AdReportProcessor(raw_file, bench_file)
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
+        try:
+            with st.spinner("阶段 1/2: 数据清洗、Top10截断、降维合并..."):
+                processor.process_etl()
+                st.success("✅ 阶段 1 完成：Master Tables 已生成")
 
-    # --- Action Area (居中) ---
-    _, btn_col, _ = st.columns([5, 2, 5])
-    with btn_col:
-        start = st.button("开始生成报告 ✦")
+                # Preview Master Data
+                with st.expander("查看降维合并后的数据 (Master Tables)"):
+                    tabs = st.tabs(processor.merged_dfs.keys())
+                    for i, (k, v) in enumerate(processor.merged_dfs.items()):
+                        with tabs[i]: st.dataframe(v.head(20))
+
+            with st.spinner("阶段 2/2: 生成架构诊断、Word报告 & JSON..."):
+                processor.generate_report()
+                st.success("✅ 阶段 2 完成：报告已生成")
+
+            st.divider()
+
+            # --- Downloads ---
+            c1, c2, c3 = st.columns(3)
+
+            # 1. JSON (Gemini)
+            json_str = json.dumps(processor.final_json, indent=4, ensure_ascii=False)
+            c1.download_button("📥 下载 JSON (用于大模型分析)", json_str, "Ad_Report_Data.json", "application/json")
+
+            # 2. Excel (Merged Data)
+            output_xls = io.BytesIO()
+            with pd.ExcelWriter(output_xls, engine='xlsxwriter') as writer:
+                for name, df in processor.merged_dfs.items(): df.to_excel(writer, sheet_name=name, index=False)
+            c2.download_button("📥 下载 Excel (用于数据透视)", output_xls.getvalue(), "Merged_Ad_Report_Final.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+            # 3. Word (Report)
+            output_doc = io.BytesIO()
+            processor.doc.save(output_doc)
+            c3.download_button("📥 下载 Word (用于数据审查)", output_doc.getvalue(), "Ad_Report_Final_V20_10.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+        except Exception as e:
+            st.error(f"处理过程中发生错误: {str(e)}")
+            st.exception(e)
+
+if __name__ == "__main__":
+    main()
 
     # --- Processing ---
     if start:
