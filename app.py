@@ -678,9 +678,9 @@ def main():
             margin-bottom: 0.5rem;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             
-            /* Gradient Text Effect - Darker/Richer for better contrast on light bg */
-            background: linear-gradient(135deg, #A239CA 0%, #4717F6 100%);
-            background: -webkit-linear-gradient(135deg, #A239CA 0%, #4717F6 100%);
+            /* Gradient Text Effect - Purple to Pink */
+            background: linear-gradient(135deg, #662D8C 0%, #ED1E79 100%);
+            background: -webkit-linear-gradient(135deg, #662D8C 0%, #ED1E79 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
