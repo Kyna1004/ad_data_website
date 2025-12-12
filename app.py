@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import io
 import json
-import Xlsxwriter
+import xlsxwriter
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
