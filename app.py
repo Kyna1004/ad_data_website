@@ -1437,7 +1437,6 @@ process = subprocess.Popen(["streamlit", "run", "app.py"])
 # 2. 使用 Pinggy 创建隧道 (无需安装，利用系统自带 SSH)
 print("🚀 正在生成 Pinggy 链接，请稍等 5 秒...")
 # 将日志输出到 pinggy.log 以便抓取链接
-!nohup ssh -p 443 -R0:localhost:8501 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 a.pinggy.io > pinggy.log 2>&1 &
 
 time.sleep(5)
 
