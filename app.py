@@ -634,8 +634,6 @@ class AdReportProcessor:
 # ==========================================
 # PART 4: Streamlit UI (保持不变)
 # ==========================================
-# --- MOCK CLASS FOR DEMONSTRATION (请在实际项目中替换为您的真实引用) ---
-# 实际代码中请删除此类，并使用: from your_module import AdReportProcessor
 class AdReportProcessor:
     def __init__(self, raw, bench):
         self.raw = raw
@@ -671,52 +669,6 @@ def main():
             background-attachment: fixed;
             background-size: cover;
         }
-        
-        /* Reduce default top padding to make the nav bar look better */
-        .block-container {
-            padding-top: 2rem;
-        }
-
-        /* NEW: Top Navigation Bar Style */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem 1.5rem;
-            background: rgba(255, 255, 255, 0.5); /* Glassmorphism transparency */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-            margin-bottom: 2rem;
-        }
-
-        .nav-logo {
-            font-size: 1.2rem;
-            font-weight: 700;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            /* Unified Gradient Style */
-            background: linear-gradient(135deg, #662D8C 0%, #ED1E79 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-items {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .nav-item-active {
-            color: #ED1E79; /* Pink accent */
-            font-weight: 600;
-        }
 
         /* 1. Main Title Style (Gradient) */
         .main-title {
@@ -742,6 +694,11 @@ def main():
         }
 
         /* 3. Card/Container Headers */
+        /* Make cards slightly translucent to blend with background */
+        div[data-testid="stVerticalBlock"] > div > div[data-testid="stVerticalBlock"] {
+            /* This selector targets inner containers if needed, but st.container(border=True) handles most */
+        }
+        
         .card-header {
             text-align: center;
             font-weight: 600;
@@ -782,21 +739,6 @@ def main():
             background-color: rgba(255, 255, 255, 0.5);
         }
         </style>
-    """, unsafe_allow_html=True)
-
-    # --- Top Navigation Bar ---
-    st.markdown("""
-        <div class="top-nav">
-            <div class="nav-logo">
-                <span>✨</span> Auto-Merge <span style="font-weight:300; opacity:0.8; margin-left:4px;">Analysis</span>
-            </div>
-            <div class="nav-items">
-                <span class="nav-item-active">Dashboard</span>
-                <span>History</span>
-                <span>Settings</span>
-                <span>Help</span>
-            </div>
-        </div>
     """, unsafe_allow_html=True)
 
     # --- Header Section ---
