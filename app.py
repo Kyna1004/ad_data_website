@@ -461,7 +461,9 @@ class AdReportProcessor:
                     df_f = pd.DataFrame(final_data, columns=col_order)
                     df_f_display = apply_report_labels(df_f)
                     add_df_to_word(self.doc, df_f_display, "1. 数据大盘总览", level=1)
-                    self.final_json['1_data_overview'] = df_f.to_dict(orient='records')
+                    
+                    # ✅ 修改: JSON 使用展示名 DataFrame
+                    self.final_json['1_data_overview'] = df_f_display.to_dict(orient='records')
 
                     # 2. Benchmark
                     raw_current = calc_metrics_dict(df_clean)
@@ -507,7 +509,7 @@ class AdReportProcessor:
                     if not find_column_fuzzy(df_curr, ['cpa']): df_curr['cpa'] = df_curr['spend'] / df_curr['purchases'].replace(0, np.nan) if 'purchases' in df_curr else 0
 
                     req_cols = ["dimension_item", "spend", "ctr", "cpc", "cpm", "cpa", "roas"]
-                    # ✅ 现在，如果是受众表，这些字段已经被保留下来了
+                    
                     if "受众" in title: req_cols += ["converting_countries", "converting_keywords", "converting_genders", "converting_ages"]
 
                     rename_map = {}; valid_cols = []
@@ -538,7 +540,9 @@ class AdReportProcessor:
                     df_clean = df_final.round(2)
                     df_display = apply_report_labels(df_clean, custom_mapping={'dimension_item': dim_label})
                     add_df_to_word(self.doc, df_display, title, level=2)
-                    self.final_json['3_audience_analysis'][title] = df_clean.to_dict(orient='records')
+                    
+                    # ✅ 修改: JSON 使用展示名 DataFrame
+                    self.final_json['3_audience_analysis'][title] = df_display.to_dict(orient='records')
 
         # 4. 素材与落地页
         if "Master_Creative" in self.merged_dfs:
@@ -567,9 +571,12 @@ class AdReportProcessor:
                     df_final = df_curr[valid_cols].rename(columns=rename_map)
                     if 'spend' in df_final.columns: df_final = df_final.sort_values('spend', ascending=False).head(10)
                     df_clean = df_final.round(2) 
+                    
                     df_display = apply_report_labels(df_clean, custom_mapping={'content_item': label})
                     add_df_to_word(self.doc, df_display, title, level=1)
-                    self.final_json[json_key] = df_clean.to_dict(orient='records')
+                    
+                    # ✅ 修改: JSON 使用展示名 DataFrame
+                    self.final_json[json_key] = df_display.to_dict(orient='records')
                     
         # 5. 版位
         if "Master_Breakdown" in self.merged_dfs:
@@ -590,14 +597,21 @@ class AdReportProcessor:
                      if f: valid_cols.append(f); rename_map[f] = c
                      else: df_curr[c] = 0.0; valid_cols.append(c)
                  df_clean = df_curr[valid_cols].rename(columns=rename_map).round(2)
+                 
                  df_top5 = df_clean.sort_values('spend', ascending=False).head(5)
                  add_df_to_word(self.doc, apply_report_labels(df_top5, {'dimension_item': '版位'}), "5.1 版位花费 TOP 5", level=2)
+                 
                  mean_ctr = df_clean['ctr'].mean(); mean_cpm = df_clean['cpm'].mean()
                  mask_pot = (df_clean['ctr'] > mean_ctr) & (df_clean['cpm'] < mean_cpm)
                  df_pot = df_clean[mask_pot].sort_values('ctr', ascending=False).head(5)
                  if df_pot.empty: df_pot = df_clean.sort_values('ctr', ascending=False).head(5)
                  add_df_to_word(self.doc, apply_report_labels(df_pot, {'dimension_item': '版位'}), "5.2 版位高潜力", level=2)
-                 self.final_json['5_placement_analysis'] = {"top_spend": df_top5.to_dict('records'), "high_potential": df_pot.to_dict('records')}
+                 
+                 # ✅ 修改: JSON 使用 apply_report_labels 处理后的 DataFrame
+                 self.final_json['5_placement_analysis'] = {
+                     "top_spend": apply_report_labels(df_top5, {'dimension_item': '版位'}).to_dict('records'),
+                     "high_potential": apply_report_labels(df_pot, {'dimension_item': '版位'}).to_dict('records')
+                 }
 
         # 7. 架构诊断
         rows = []
