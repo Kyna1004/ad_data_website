@@ -547,48 +547,45 @@ class AdReportProcessor:
                     add_df_to_word(self.doc, df_display, title, level=2)
                     self.final_json['3_audience_analysis'][title] = df_clean.to_dict(orient='records')
 
-        # 4. 素材与落地页 (从 Master_Creative)
+# 4. 素材与落地页 (从 Master_Creative)
         if "Master_Creative" in self.merged_dfs:
             df_cr = self.merged_dfs["Master_Creative"]
             
             # 遍历素材和落地页两个板块
             for title, keywords, label, json_key in [("4. 素材分析", ["素材", "Creative"], "素材名称", "4_creative_analysis"), ("6. 落地页分析", ["落地页", "Landing"], "落地页 URL", "6_landing_page_analysis")]:
                 
-                # 筛选对应的数据行 (通过 Source_Sheet)
                 mask = df_cr['Source_Sheet'].astype(str).apply(lambda x: any(k in x for k in keywords))
                 df_curr = df_cr[mask].copy()
 
                 if not df_curr.empty:
-                    # --- 1. 基础补全：计算 CPC 和 CPA (如果原始数据缺失) ---
+                    # --- 1. 基础补全：计算 CPC 和 CPA ---
                     if not find_column_fuzzy(df_curr, ['cpc']):
                         df_curr['cpc'] = df_curr['spend'] / df_curr['clicks'].replace(0, np.nan) if 'clicks' in df_curr else 0
                     if not find_column_fuzzy(df_curr, ['cpa']):
                         df_curr['cpa'] = df_curr['spend'] / df_curr['purchases'].replace(0, np.nan) if 'purchases' in df_curr else 0
 
-                    # --- 2. CTR 核心修复逻辑 (Start) ---
-                    # 步骤 A: 优先尝试使用 (点击 / 展示) 计算常规 CTR
+                    # --- 2. CTR 核心修复与百分比化 (Start) ---
+                    # 步骤 A: 优先尝试使用 (点击 / 展示) 计算常规 CTR (此时为小数，如 0.015)
                     if not find_column_fuzzy(df_curr, ['ctr']):
                         if 'impressions' in df_curr and 'clicks' in df_curr:
                             df_curr['ctr'] = df_curr['clicks'] / df_curr['impressions'].replace(0, np.nan)
                         else:
                             df_curr['ctr'] = np.nan
                     
-                    # 步骤 B: 异常修复
-                    # 如果 CTR 还是 NaN 或 0，但存在 CPM 和 CPC，则使用公式推导
-                    # 公式原理: CPM = (花费/展示)*1000 => CTR = CPM / (CPC * 1000)
+                    # 步骤 B: 异常修复 (针对 NaN 或 0 的行)
+                    # 公式: Decimal_CTR = CPM / (CPC * 1000)
                     if 'cpc' in df_curr.columns and 'cpm' in df_curr.columns:
-                        # 定位需要修复的行 (CTR无效 且 CPC大于0)
                         mask_fix = (df_curr['ctr'].isna() | (df_curr['ctr'] == 0)) & (df_curr['cpc'] > 0)
-                        
                         if mask_fix.any():
-                            # 计算推导值 (结果为小数，如 0.0153)
                             df_curr.loc[mask_fix, 'ctr'] = df_curr.loc[mask_fix, 'cpm'] / (df_curr.loc[mask_fix, 'cpc'] * 1000)
 
-                    # 步骤 C: 兜底，将剩余无法计算的 NaN 填充为 0
+                    # 步骤 C: 兜底并统一转换为百分比数据 (关键修改)
+                    # 目的: 将 0.0153 转换为 1.53，以匹配 "CTR (%)" 的表头
                     df_curr['ctr'] = df_curr['ctr'].fillna(0)
-                    # --- 2. CTR 核心修复逻辑 (End) ---
+                    df_curr['ctr'] = df_curr['ctr'] * 100 
+                    # --- 2. CTR 核心修复与百分比化 (End) ---
 
-                    # --- 3. 字段映射与重命名 ---
+                    # --- 3. 字段映射 ---
                     req_cols = ["content_item", "spend", "ctr", "cpc", "cpm", "roas", "cpa"]
                     rename_map = {}; valid_cols = []
                     
@@ -599,18 +596,18 @@ class AdReportProcessor:
                             valid_cols.append(found)
                             rename_map[found] = req
                         else:
-                            df_curr[req] = 0.0 # 缺失字段补 0
+                            df_curr[req] = 0.0
                             valid_cols.append(req)
 
                     df_final = df_curr[valid_cols].rename(columns=rename_map)
 
-                    # --- 4. 排序与截断 ---
-                    # 已经在 Phase 1 做过 Top 10 了，这里为了保险再做一次 Spend 倒序
+                    # --- 4. 排序 ---
                     if 'spend' in df_final.columns:
                         df_final = df_final.sort_values('spend', ascending=False).head(10)
 
                     # --- 5. 输出 ---
-                    df_clean = df_final.round(4) # 保留4位小数以防 CTR (0.00xx) 精度丢失
+                    # 因为已经是百分比数值 (1.53)，保留 2 位小数即可
+                    df_clean = df_final.round(2) 
                     
                     # 生成 Word 表格
                     df_display = apply_report_labels(df_clean, custom_mapping={'content_item': label})
@@ -618,7 +615,7 @@ class AdReportProcessor:
                     
                     # 生成 JSON 数据
                     self.final_json[json_key] = df_clean.to_dict(orient='records')
-
+                    
         # 5. 版位 (Master_Breakdown)
         if "Master_Breakdown" in self.merged_dfs:
              self.doc.add_heading("5. 版位分析", level=1)
