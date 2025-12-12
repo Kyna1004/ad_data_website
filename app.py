@@ -1442,4 +1442,3 @@ time.sleep(5)
 
 # 3. 显示链接
 print("\n👇 请点击下方显示的链接 (通常以 https://...pinggy.link 结尾):")
-!grep -o "https://[^ ]*\.pinggy\.link" pinggy.log
