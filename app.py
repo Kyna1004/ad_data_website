@@ -129,33 +129,64 @@ FIELD_ALIASES = {
 # PART 2: 核心工具函数 (保持不变，略)
 # ==========================================
 
-# ... (保持 parse_float, safe_div, clean_numeric, clean_numeric_strict 等函数不变) ...
+# ==========================================
+# PART 2: 核心工具函数 (已修复百分比识别问题)
+# ==========================================
+
 def parse_float(value):
-    if value is None: return 0.0
+    """辅助函数：清理数据并将字符串/数字安全转换为浮点数"""
+    if value is None:
+        return 0.0
     try:
-        if isinstance(value, (int, float)): return float(value)
-        return float(str(value).replace(',', '').strip())
-    except: return 0.0
+        # 如果已经是数字，直接返回
+        if isinstance(value, (int, float)):
+            return float(value)
+        # 如果是字符串，调用 clean_numeric_strict 进行标准处理
+        return clean_numeric_strict(value)
+    except (ValueError, TypeError):
+        return 0.0
 
 def safe_div(numerator, denominator, multiplier=1.0):
-    n, d = parse_float(numerator), parse_float(denominator)
-    return (n / d) * multiplier if d > 0 else 0.0
+    n = parse_float(numerator)
+    d = parse_float(denominator)
+    if d > 0:
+        return (n / d) * multiplier
+    else:
+        return 0.0
 
+# 宽松清洗（用于展示）
 def clean_numeric(val):
     if pd.isna(val): return 0.0
     if isinstance(val, (int, float)): return float(val)
     val_str = str(val).strip().replace('$', '').replace('¥', '').replace(',', '')
-    if '%' in val_str: val_str = val_str.replace('%', '')
+    
+    # ✅ 修复点 1：如果是百分数字符串，转换后除以 100
+    if '%' in val_str: 
+        val_str = val_str.replace('%', '')
+        try: return float(val_str) / 100.0 
+        except: return 0.0
+        
     try: return float(val_str)
     except: return val
 
-def clean_numeric_strict(val):
+# 严格清洗（用于计算）
+def clean_numeric_strict(val): 
     if pd.isna(val): return 0.0
+    # 如果已经是数字，直接返回
+    if isinstance(val, (int, float)): return float(val)
+    
     val_str = str(val).strip().replace('$', '').replace('¥', '').replace(',', '')
-    if '%' in val_str: val_str = val_str.replace('%', '')
+    
+    # ✅ 修复点 2：如果是百分数字符串（如 "2.31%"），去除%后除以100还原为小数（0.0231）
+    if '%' in val_str: 
+        val_str = val_str.replace('%', '')
+        try: return float(val_str) / 100.0
+        except: return 0.0
+        
     try: return float(val_str)
     except: return 0.0
 
+# 字段鲁棒核心
 def find_column_fuzzy(df, keywords):
     for kw in keywords:
         if kw in df.columns: return kw
@@ -169,18 +200,22 @@ def find_column_fuzzy(df, keywords):
             if kw.lower() in col_lower: return col
     return None
 
+# 核心指标计算 (保持不变)
 def calc_metrics_dict(df_chunk):
     res = {}
     if df_chunk.empty: return res
     sums = {}
     targets = ['spend', 'clicks', 'impressions', 'purchases', 'purchase_value',
                'landing_page_views', 'add_to_cart', 'initiate_checkout']
+    
     for t in targets:
         aliases = FIELD_ALIASES.get(t, [t])
         if t == 'purchase_value' and 'value' not in aliases: aliases.append('value')
         col = find_column_fuzzy(df_chunk, aliases)
-        if col: sums[t] = df_chunk[col].apply(clean_numeric_strict).sum()
-        else: sums[t] = 0.0
+        if col:
+             sums[t] = df_chunk[col].apply(clean_numeric_strict).sum()
+        else:
+             sums[t] = 0.0
 
     res['spend'] = parse_float(sums.get('spend', 0))
     res['impressions'] = parse_float(sums.get('impressions', 0))
@@ -207,7 +242,7 @@ def calc_metrics_dict(df_chunk):
             else: res['date_range'] = "-"
         except: res['date_range'] = "-"
     else: res['date_range'] = "-"
-    return res
+    return res 
 
 def format_cell(key, val, is_mom=False):
     if isinstance(val, str): return val
@@ -216,7 +251,9 @@ def format_cell(key, val, is_mom=False):
         return f"{val:+.2%}"
     k = str(key).lower()
     if 'roas' in k: return f"{val:.2f}"
-    if any(x in k for x in ['rate', 'ctr', 'cvr', '点击率', '转化率', '着陆率', '意向率', '成功率']): return f"{val:.2%}"
+    if any(x in k for x in ['rate', 'ctr', 'cvr', '点击率', '转化率', '着陆率', '意向率', '成功率']): 
+        # 这里会乘以100，所以输入必须是小数 (0.0231 -> 2.31%)
+        return f"{val:.2%}" 
     if any(x in k for x in ['spend', 'cpm', 'cpc', 'value', 'aov', 'cpa', '花费', '金额', '客单价', 'gmv', '价值']): return f"{val:,.2f}"
     if any(x in k for x in ['purchases', 'cart', 'click', '次数', '单量', '点击', '展现', '访问量', '发起数']): return f"{val:,.0f}"
     return f"{val}"
@@ -233,9 +270,18 @@ def extract_benchmark_values(df_bench):
             try:
                 s = df_bench[found_col].apply(clean_numeric_strict)
                 v = s[s>0].mean()
+                
+                # ✅ 修复点 3：防御性逻辑
+                # 如果是 CTR/CVR 等比率类指标，且基准值 > 1.0 (例如用户填了 2.31 而不是 0.0231)，
+                # 且该列不是 CPA/CPM/ROAS/CPC 这种本身就很大的值，则强制除以100
+                if metric in ['ctr'] and v > 1.0:
+                    v = v / 100.0
+                    
                 if not pd.isna(v): extracted[metric] = [v, higher_better]
             except: pass
     return extracted
+
+# ... (add_hyperlink, apply_report_labels, add_df_to_word 保持不变)
 
 def add_hyperlink(paragraph, url, text, color="0000FF", underline=True):
     try:
