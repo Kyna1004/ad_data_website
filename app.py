@@ -633,102 +633,196 @@ class AdReportProcessor:
 # ==========================================
 # PART 4: Streamlit UI (保持不变)
 # ==========================================
+# --- MOCK CLASS FOR DEMONSTRATION (请在实际项目中替换为您的真实引用) ---
+# 实际代码中请删除此类，并使用: from your_module import AdReportProcessor
+class AdReportProcessor:
+    def __init__(self, raw, bench):
+        self.raw = raw
+        self.bench = bench
+        self.merged_dfs = {
+            "Master_Data": pd.DataFrame({'Campaign': ['C1', 'C2'], 'Cost': [100, 200]}),
+            "Analysis": pd.DataFrame({'Metric': ['A', 'B'], 'Value': [0.5, 0.8]})
+        }
+        self.final_json = {"status": "success", "data": "mock_data"}
+        # Mocking a Word document object
+        self.doc = io.BytesIO(b"Fake Word Content")
+        self.doc.save = lambda x: x.write(b"Fake Word Content")
+
+    def process_etl(self):
+        time.sleep(1.5) # Simulate processing time
+
+    def generate_report(self):
+        time.sleep(1.0) # Simulate processing time
+# -------------------------------------------------------------------
+
 def main():
     st.set_page_config(page_title="Auto-Merge & Analysis V20.10", layout="wide")
-    st.title("📊广告优化报告数据终表生产")
 
+    # --- CSS Styles ---
     st.markdown("""
-    **功能说明：**
-    1. 请您上传[周期性复盘报告]、[行业benchmark]两个数据文件。
-    2. 本工具将为您输出三种文件，JSON格式可用于大模型分析，Excel可用于数据透视，Word格式可用于审查。
-    3. 建议：**您可只选择下载JSON格式文件**，如有必要再下载其他格式文件。
-    4. 如果有其他问题，可联系Keyi。
-    """)
+        <style>
+        /* 1. Main Title Style (Purple) */
+        .main-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #8E44AD; /* Purple color matching the image */
+            margin-bottom: 0.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
 
-    col1, col2 = st.columns(2)
+        /* 2. Subtitle Description */
+        .sub-title {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #7F8C8D;
+            margin-bottom: 3rem;
+        }
+
+        /* 3. Card/Container Headers */
+        .card-header {
+            text-align: center;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+        
+        .icon-container {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        /* 4. Center the 'Start' button */
+        div.stButton > button {
+            display: block;
+            margin: 0 auto;
+            background-color: #2C3E50;
+            color: white;
+            border-radius: 25px;
+            padding: 0.5rem 2rem;
+            font-size: 1rem;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        div.stButton > button:hover {
+            background-color: #1a252f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            color: white;
+        }
+        
+        /* Hide default uploader file list to make it cleaner (optional) */
+        /* [data-testid='stFileUploader'] section {padding: 1rem;} */
+        </style>
+    """, unsafe_allow_html=True)
+
+    # --- Header Section ---
+    st.markdown('<div class="main-title">What can I help with?</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sub-title">请上传您的【周期性复盘报告】、【行业benchmark】数据文件，我将为您生成处理后的【数据终表】。</div>', 
+        unsafe_allow_html=True
+    )
+
+    # --- File Upload Section (Cards) ---
+    col1, col_gap, col2 = st.columns([1, 0.1, 1])
+
     with col1:
-        raw_file = st.file_uploader("1. 上传 [数据报表] (Excel)", type=["xlsx", "xls"])
-    with col2:
-        bench_file = st.file_uploader("2. 上传 [行业Benchmark]", type=["xlsx", "xls"])
+        # Use container with border to mimic the card look
+        with st.container(border=True):
+            st.markdown('<div class="icon-container">📊</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-header">上传数据报表 (Excel)</div>', unsafe_allow_html=True)
+            raw_file = st.file_uploader("", type=["xlsx", "xls"], key="raw_uploader", label_visibility="collapsed")
 
-    if st.button("🚀 开始处理"):
+    with col2:
+        with st.container(border=True):
+            st.markdown('<div class="icon-container">🎯</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-header">上传行业 Benchmark</div>', unsafe_allow_html=True)
+            bench_file = st.file_uploader("", type=["xlsx", "xls"], key="bench_uploader", label_visibility="collapsed")
+
+    st.write("") # Spacer
+    st.write("") # Spacer
+
+    # --- Action Button (Centered) ---
+    # We use columns to center the button visually
+    b_c1, b_c2, b_c3 = st.columns([1, 1, 1])
+    with b_c2:
+        start_btn = st.button("开始生成报告 ✦", use_container_width=True)
+
+    # --- Logic ---
+    if start_btn:
         if not raw_file:
-            st.error("请至少上传数据报表！")
+            st.error("⚠️ 请至少上传 [数据报表] 才能继续！")
             return
 
+        # Initialize your processor
         processor = AdReportProcessor(raw_file, bench_file)
 
         try:
+            # Process Stage 1
             with st.spinner("阶段 1/2: 数据清洗、Top10截断、降维合并..."):
                 processor.process_etl()
-                st.success("✅ 阶段 1 完成：Master Tables 已生成")
+                # Use toast for a cleaner success message (Streamlit 1.28+) or regular success
+                st.toast("✅ 阶段 1 完成：Master Tables 已生成", icon="✅")
 
-                # Preview Master Data
-                with st.expander("查看降维合并后的数据 (Master Tables)"):
-                    tabs = st.tabs(processor.merged_dfs.keys())
-                    for i, (k, v) in enumerate(processor.merged_dfs.items()):
-                        with tabs[i]: st.dataframe(v.head(20))
+            # Preview Section (Optional, cleaner look)
+            with st.expander("📄 点击查看处理后的数据预览 (Master Tables)", expanded=False):
+                tabs = st.tabs(list(processor.merged_dfs.keys()))
+                for i, (k, v) in enumerate(processor.merged_dfs.items()):
+                    with tabs[i]: 
+                        st.dataframe(v.head(20), use_container_width=True)
 
+            # Process Stage 2
             with st.spinner("阶段 2/2: 生成架构诊断、Word报告 & JSON..."):
                 processor.generate_report()
-                st.success("✅ 阶段 2 完成：报告已生成")
+                st.toast("✅ 阶段 2 完成：所有报告已准备就绪", icon="🎉")
+            
+            st.balloons() # Fun effect on completion
+            
+            # --- Results Area ---
+            st.markdown("### 📥 下载结果文件")
+            st.info("建议：您可只选择下载 JSON 格式文件用于大模型分析，如有必要再下载其他格式文件。")
 
-            st.divider()
+            res_c1, res_c2, res_c3 = st.columns(3)
 
-            # --- Downloads ---
-            c1, c2, c3 = st.columns(3)
-
-            # 1. JSON (Gemini)
+            # 1. JSON
             json_str = json.dumps(processor.final_json, indent=4, ensure_ascii=False)
-            c1.download_button("📥 下载 JSON (用于大模型分析)", json_str, "Ad_Report_Data.json", "application/json")
+            res_c1.download_button(
+                "📥 JSON (大模型分析)", 
+                json_str, 
+                "Ad_Report_Data.json", 
+                "application/json",
+                use_container_width=True
+            )
 
-            # 2. Excel (Merged Data)
+            # 2. Excel
             output_xls = io.BytesIO()
             with pd.ExcelWriter(output_xls, engine='xlsxwriter') as writer:
-                for name, df in processor.merged_dfs.items(): df.to_excel(writer, sheet_name=name, index=False)
-            c2.download_button("📥 下载 Excel (用于数据透视)", output_xls.getvalue(), "Merged_Ad_Report_Final.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                for name, df in processor.merged_dfs.items(): 
+                    df.to_excel(writer, sheet_name=name, index=False)
+            res_c2.download_button(
+                "📥 Excel (数据透视)", 
+                output_xls.getvalue(), 
+                "Merged_Ad_Report_Final.xlsx", 
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
 
-            # 3. Word (Report)
+            # 3. Word
             output_doc = io.BytesIO()
             processor.doc.save(output_doc)
-            c3.download_button("📥 下载 Word (用于数据审查)", output_doc.getvalue(), "Ad_Report_Final_V20_10.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            res_c3.download_button(
+                "📥 Word (数据审查)", 
+                output_doc.getvalue(), 
+                "Ad_Report_Final_V20_10.docx", 
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
 
         except Exception as e:
-            st.error(f"处理过程中发生错误: {str(e)}")
+            st.error(f"❌ 处理过程中发生错误: {str(e)}")
             st.exception(e)
-
-if __name__ == "__main__":
-    main()
-
-    # --- Processing ---
-    if start:
-        if not f1:
-            st.warning("请先上传主数据报表")
-        else:
-            processor = MockProcessor(f1, f2)
-            
-            # 极简状态显示
-            with st.status("正在进行数据处理...", expanded=True) as status:
-                st.write("提取关键指标...")
-                time.sleep(0.8)
-                st.write("生成架构洞察...")
-                processor.run_pipeline()
-                status.update(label="分析完成", state="complete", expanded=False)
-
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.divider()
-            
-            # 结果下载 - 居中排列
-            st.markdown("<div style='text-align:center; margin-bottom:20px; font-weight:600; color:#555;'>您的文件已准备就绪</div>", unsafe_allow_html=True)
-            
-            # 使用较窄的居中列来放下载按钮
-            _, d1, d2, d3, _ = st.columns([2, 2, 2, 2, 2])
-            with d1:
-                st.download_button("JSON 结构", data="{}", file_name="data.json", use_container_width=True)
-            with d2:
-                st.download_button("Excel 透视", data=b"xls", file_name="data.xlsx", use_container_width=True)
-            with d3:
-                st.download_button("Word 报告", data=b"doc", file_name="report.docx", use_container_width=True)
 
 if __name__ == "__main__":
     main()
