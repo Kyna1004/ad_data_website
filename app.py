@@ -478,7 +478,7 @@ class AdReportProcessor:
                     df_f = pd.DataFrame(final_data, columns=col_order)
                     df_f_display = apply_report_labels(df_f)
                     add_df_to_word(self.doc, df_f_display, "1. 数据大盘总览", level=1)
-                    self.final_json['1_data_overview'] = df_f.fillna(0).to_dict(orient='records')
+                    self.final_json['1_data_overview'] = df_f.to_dict(orient='records')
 
                     # 2. Benchmark
                     raw_current = calc_metrics_dict(df_clean)
@@ -545,7 +545,7 @@ class AdReportProcessor:
                     df_clean = df_final.round(2)
                     df_display = apply_report_labels(df_clean, custom_mapping={'dimension_item': dim_label})
                     add_df_to_word(self.doc, df_display, title, level=2)
-                    self.final_json['3_audience_analysis'][title] = df_clean.fillna(0).to_dict(orient='records')
+                    self.final_json['3_audience_analysis'][title] = df_clean.to_dict(orient='records')
 
         # 4. 素材与落地页 (从 Master_Creative)
         if "Master_Creative" in self.merged_dfs:
@@ -574,7 +574,7 @@ class AdReportProcessor:
                     df_clean = df_final.round(2)
                     df_display = apply_report_labels(df_clean, custom_mapping={'content_item': label})
                     add_df_to_word(self.doc, df_display, title, level=1)
-                    self.final_json[json_key] = df_clean.fillna(0).to_dict(orient='records')
+                    self.final_json[json_key] = df_clean.to_dict(orient='records')
 
         # 5. 版位 (Master_Breakdown)
         if "Master_Breakdown" in self.merged_dfs:
@@ -609,7 +609,7 @@ class AdReportProcessor:
                  if df_pot.empty: df_pot = df_clean.sort_values('ctr', ascending=False).head(5)
                  add_df_to_word(self.doc, apply_report_labels(df_pot, {'dimension_item': '版位'}), "5.2 版位高潜力", level=2)
 
-                 self.final_json['5_placement_analysis'] = {"top_spend": df_top5.fillna(0).to_dict('records'), "high_potential": df_pot.fillna(0).to_dict('records')}
+                 self.final_json['5_placement_analysis'] = {"top_spend": df_top5.to_dict('records'), "high_potential": df_pot.to_dict('records')}
 
         # 7. 架构诊断
         rows = []
@@ -651,6 +651,7 @@ class AdReportProcessor:
 
         df_struct = pd.DataFrame(rows)
         add_df_to_word(self.doc, df_struct, "7. 广告架构分析", level=1)
+        self.final_json['1_data_overview'] = df_f_display.to_dict(orient='records')
 
 
 # ==========================================
