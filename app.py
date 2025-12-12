@@ -741,7 +741,7 @@ def main():
             margin-bottom: 3rem;
         }
 
-        /* --- NEW: High-End Glassmorphism Card Style (Matching Circled Areas) --- */
+        /* --- NEW: High-End Glassmorphism Card Style (Outer Containers) --- */
         [data-testid="stVerticalBlockBorderWrapper"] {
             background: rgba(255, 255, 255, 0.45) !important; /* Milky transparent white */
             backdrop-filter: blur(14px); /* Blur effect for "Glass" look */
@@ -753,11 +753,10 @@ def main():
             transition: all 0.3s ease;
         }
 
-        /* Hover Effect for Cards: Subtle Lift & Purple/Pink Tint */
         [data-testid="stVerticalBlockBorderWrapper"]:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(102, 45, 140, 0.1); /* Purple tint shadow */
-            border-color: rgba(237, 30, 121, 0.2) !important; /* Subtle pink border */
+            box-shadow: 0 15px 35px rgba(102, 45, 140, 0.1);
+            border-color: rgba(237, 30, 121, 0.2) !important;
             background: rgba(255, 255, 255, 0.65) !important;
         }
 
@@ -774,58 +773,79 @@ def main():
             text-align: center;
             font-size: 2.5rem;
             margin-bottom: 5px;
-            /* Optional: Add a subtle glow to emojis */
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
-        /* --- Customizing the Streamlit File Uploader (Inner Box) --- */
+        /* --- Customizing the Streamlit File Uploader (Target 1: Uploader Box) --- */
+        /* Enhanced Glass Effect for File Upload Area */
         [data-testid='stFileUploader'] section {
-            background-color: rgba(255, 255, 255, 0.3);
-            border: 1.5px dashed rgba(102, 45, 140, 0.25); /* Light Purple Dashed Border */
+            background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent */
+            backdrop-filter: blur(15px); /* Strong blur */
+            -webkit-backdrop-filter: blur(15px);
+            border: 1.5px dashed rgba(102, 45, 140, 0.3); /* Purple dashed border */
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5); /* Inner glow */
             border-radius: 16px;
-            padding: 1rem;
+            padding: 1.5rem; /* More spacing */
+            transition: all 0.3s ease;
         }
         
         [data-testid='stFileUploader'] section:hover {
-            background-color: rgba(255, 255, 255, 0.6);
-            border-color: rgba(237, 30, 121, 0.5); /* Pinkish on hover */
+            background-color: rgba(255, 255, 255, 0.5);
+            border-color: #ED1E79; /* Pink hover border */
+            box-shadow: 0 8px 20px rgba(102, 45, 140, 0.15); /* Outer shadow on hover */
         }
         
         [data-testid='stFileUploader'] button {
             border-radius: 20px;
             border-color: rgba(102, 45, 140, 0.2);
             color: #662D8C;
+            background-color: rgba(255, 255, 255, 0.8);
         }
 
-        /* 4. Center the 'Start' button with Gradient */
-        div.stButton > button {
+        /* --- Target 2: Suggestion/Info Box Style --- */
+        .glass-info-box {
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            border-radius: 16px;
+            
+            /* Glassmorphism Props */
+            background: rgba(255, 255, 255, 0.3); /* Transparent white */
+            backdrop-filter: blur(15px); /* Strong blur */
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.7); /* Shiny glass edge */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Subtle depth */
+        }
+
+        /* 4. BUTTON STYLES: High Contrast Gradient (Purple -> Cyan) */
+        div.stButton > button, div.stDownloadButton > button {
             display: block;
             margin: 0 auto;
-            /* Gradient Background */
-            background-image: linear-gradient(135deg, #CB5EEE 0%, #4BE1EC 100%);
-            color: white;
+            width: 100%;
+            background-image: linear-gradient(90deg, #B721FF 0%, #21D4FD 100%);
+            color: white !important;
             border-radius: 30px;
-            padding: 0.7rem 3rem;
-            font-size: 1.15rem;
+            padding: 0.7rem 1.5rem;
+            font-size: 1.1rem;
             font-weight: 600;
             border: none;
-            box-shadow: 0 6px 20px rgba(203, 94, 238, 0.35);
+            box-shadow: 0 6px 20px rgba(183, 33, 255, 0.4); 
             transition: all 0.3s ease;
         }
-        div.stButton > button:hover {
+        
+        div.stButton > button:hover, div.stDownloadButton > button:hover {
             opacity: 0.95;
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(203, 94, 238, 0.5);
-            color: white;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(33, 212, 253, 0.5);
+            color: white !important;
         }
         
-        /* Style for the 'Advice' Info Box in Download Section */
         div[data-baseweb="notification"] {
-            background-color: rgba(102, 45, 140, 0.05); /* Very light purple bg */
+            background-color: rgba(102, 45, 140, 0.05);
             border-left-color: #662D8C;
             border-radius: 12px;
         }
-
         </style>
     """, unsafe_allow_html=True)
 
@@ -856,7 +876,6 @@ def main():
 
     with col1:
         # Use container with border to mimic the card look
-        # This will now pick up the "High-End Glassmorphism" styles defined in CSS
         with st.container(border=True):
             st.markdown('<div class="icon-container">📊</div>', unsafe_allow_html=True)
             st.markdown('<div class="card-header">上传数据报表 (Excel)</div>', unsafe_allow_html=True)
@@ -872,10 +891,8 @@ def main():
     st.write("") # Spacer
 
     # --- Action Button (Centered) ---
-    # We use columns to center the button visually
     b_c1, b_c2, b_c3 = st.columns([1, 1, 1])
     with b_c2:
-        # Added emoji " ✦" back to button text
         start_btn = st.button("开始生成报告 ✦", use_container_width=True)
 
     # --- Logic ---
@@ -884,36 +901,44 @@ def main():
             st.error("⚠️ 请至少上传 [数据报表] 才能继续！")
             return
 
-        # Initialize your processor
         processor = AdReportProcessor(raw_file, bench_file)
 
         try:
-            # Process Stage 1
             with st.spinner("阶段 1/2: 数据清洗、Top10截断、降维合并..."):
                 processor.process_etl()
-                # Use toast for a cleaner success message (Streamlit 1.28+) or regular success
                 st.toast("✅ 阶段 1 完成：Master Tables 已生成", icon="✅")
 
-            # Preview Section (Optional, cleaner look)
             with st.expander("📄 点击查看处理后的数据预览 (Master Tables)", expanded=False):
                 tabs = st.tabs(list(processor.merged_dfs.keys()))
                 for i, (k, v) in enumerate(processor.merged_dfs.items()):
                     with tabs[i]: 
                         st.dataframe(v.head(20), use_container_width=True)
 
-            # Process Stage 2
             with st.spinner("阶段 2/2: 生成架构诊断、Word报告 & JSON..."):
                 processor.generate_report()
                 st.toast("✅ 阶段 2 完成：所有报告已准备就绪", icon="🎉")
             
-            st.balloons() # Fun effect on completion
+            st.balloons() 
             
             # --- Results Area ---
             st.markdown("### 📥 下载结果文件")
             
-            # WRAPPED IN CONTAINER to match the top cards style (Glassmorphism)
             with st.container(border=True):
-                st.info("💡 建议：您可只选择下载 JSON 格式文件用于大模型分析，如有必要再下载其他格式文件。")
+                # REPLACED INLINE STYLE WITH CLASS '.glass-info-box'
+                st.markdown("""
+                    <div class="glass-info-box">
+                        <span style="font-size: 1.2rem; margin-right: 0.8rem;">💡</span>
+                        <span style="
+                            font-weight: 600;
+                            background: linear-gradient(135deg, #662D8C 0%, #ED1E79 100%);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                        ">
+                            建议：您可只选择下载 JSON 格式文件用于大模型分析，如有必要再下载其他格式文件。
+                        </span>
+                    </div>
+                """, unsafe_allow_html=True)
 
                 res_c1, res_c2, res_c3 = st.columns(3)
 
