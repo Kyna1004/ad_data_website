@@ -651,7 +651,7 @@ class AdReportProcessor:
 
         df_struct = pd.DataFrame(rows)
         add_df_to_word(self.doc, df_struct, "7. 广告架构分析", level=1)
-        self.final_json['7_structure_audit'] = df_struct.to_dict(orient='records')
+        self.final_json['1_data_overview'] = df_f_display.to_dict(orient='records')
 
 
 # ==========================================
