@@ -1428,8 +1428,6 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #     main()
 
-!pip install streamlit pyngrok xlsxwriter python-docx
-
 import subprocess
 import time
 
