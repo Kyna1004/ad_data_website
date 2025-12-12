@@ -633,181 +633,132 @@ class AdReportProcessor:
 # ==========================================
 # PART 4: Streamlit UI (保持不变)
 # ==========================================
-def set_artistic_style():
+def set_aurora_style():
     st.markdown("""
         <style>
-        /* 引入现代无衬线字体 */
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        /* 1. 字体引入: Inter (类似 Apple/Notion 的干净字体) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
         
-        /* 全局重置 */
+        /* 2. 全局背景：极光氛围 */
         .stApp {
-            background-color: #FAFBFF; /* 极淡的蓝紫色背景 */
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #2D3748;
+            background-color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
         }
         
-        /* 标题样式 - 柔和渐变 */
-        h1 {
-            font-size: 3rem !important;
-            font-weight: 800;
-            background: linear-gradient(120deg, #845EC2, #D65DB1, #FF6F91);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-        }
-
-        /* 装饰性分割线 - 柔光 */
-        .art-divider {
-            height: 2px;
-            background: linear-gradient(90deg, rgba(132, 94, 194, 0.1), rgba(255, 111, 145, 0.5), rgba(132, 94, 194, 0.1));
-            margin: 20px 0 50px 0;
-            border-radius: 1px;
-        }
-
-        /* 模块标题 (如 1 数据源输入) */
-        .section-header {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #4A5568;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px; /* 大圆角 */
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        .section-header span {
-            display: inline-block;
-            background: linear-gradient(120deg, #845EC2, #FF9671);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            margin-right: 8px;
-        }
-
-        /* 卡片容器 (功能指南) - 悬浮玻璃态 */
-        .guide-card {
-            background: #FFFFFF;
-            border: 1px solid #EDF2F7;
-            padding: 30px;
-            border-radius: 24px; /* 大圆角 */
-            position: relative;
-            box-shadow: 0 10px 30px -5px rgba(132, 94, 194, 0.08); /* 柔和紫色阴影 */
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            margin-bottom: 40px;
-            overflow: hidden;
-        }
-        .guide-card::before {
+        /* 添加背景光晕 - 使用伪元素模拟模糊的彩色光斑 */
+        .stApp::before {
             content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 6px;
-            background: linear-gradient(90deg, #845EC2, #D65DB1, #FF9671, #FFC75F);
-        }
-        .guide-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px -5px rgba(132, 94, 194, 0.15);
-        }
-        .guide-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #2D3748;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
+            position: fixed;
+            top: -10vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80vw;
+            height: 60vh;
+            background: radial-gradient(circle, rgba(255,220,150,0.4) 0%, rgba(255,190,200,0.3) 40%, rgba(230,200,250,0.2) 70%, rgba(255,255,255,0) 100%);
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
         }
 
-        /* 文件上传组件重构 - 极简白 */
-        [data-testid='stFileUploader'] {
-            background-color: #FFFFFF;
-            border: 1px dashed #CBD5E0;
-            border-radius: 16px;
-            padding: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        /* 3. 标题样式 - 居中 & 渐变 */
+        h1 {
+            text-align: center;
+            font-weight: 800;
+            font-size: 3.5rem !important;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #2D1B69, #9F4F8A, #FF8F70);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 40px;
+            margin-bottom: 10px;
         }
-        [data-testid='stFileUploader']:hover {
-            border-color: #D65DB1; /* 悬浮变为粉紫色 */
-            background-color: #FDFAFC;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px -10px rgba(214, 93, 177, 0.2);
-        }
-        [data-testid='stFileUploader'] section {
-            padding: 0;
-        }
-        /* 上传按钮样式覆盖 */
-        [data-testid='stFileUploader'] button {
-            border: 1px solid #E2E8F0;
-            color: #4A5568;
+        
+        /* 副标题/说明文字 */
+        .subtitle {
+            text-align: center;
+            color: #8E8E93; /* 苹果灰 */
+            font-size: 1.2rem;
             font-weight: 500;
-            border-radius: 8px;
-            box-shadow: none;
-            background: white;
+            margin-bottom: 60px;
         }
 
-        /* 主按钮 (开始处理) - 强渐变 */
+        /* 4. 文件上传卡片 - 模仿参考图中的 "Cards" */
+        /* 重塑上传组件的外观 */
+        [data-testid='stFileUploader'] {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 24px; /* 超大圆角 */
+            padding: 20px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); /* 极柔和阴影 */
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-align: center;
+        }
+        
+        [data-testid='stFileUploader']:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.12);
+            border-color: rgba(200,200,255,0.5);
+        }
+
+        [data-testid='stFileUploader'] label {
+            justify-content: center;
+            font-size: 1rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        [data-testid='stFileUploader'] button {
+            background: #F2F2F7;
+            border: none;
+            color: #1a1a1a;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-weight: 600;
+        }
+
+        /* 5. 按钮 - 居中胶囊 */
         div.stButton > button:first-child {
-            background: linear-gradient(135deg, #845EC2 0%, #D65DB1 100%);
+            background: #1a1a1a; /* 极简黑 */
             color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: 18px;
-            border-radius: 50px; /* 胶囊形状 */
-            width: 100%;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            box-shadow: 0 10px 20px -5px rgba(132, 94, 194, 0.4);
+            padding: 16px 48px;
+            font-size: 16px;
+            border-radius: 100px; /* 完全胶囊形 */
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
         }
         div.stButton > button:first-child:hover {
-            background: linear-gradient(135deg, #956FD3 0%, #E76EC2 100%);
-            box-shadow: 0 15px 30px -5px rgba(132, 94, 194, 0.5);
-            transform: translateY(-3px) scale(1.02);
-        }
-        div.stButton > button:first-child:active {
-            transform: translateY(1px);
+            background: #333;
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
 
-        /* 下载按钮群 - 柔和卡片风格 */
+        /* 6. 下载区域微调 */
         [data-testid="stDownloadButton"] button {
-            background-color: #FFFFFF;
-            color: #4A5568;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            font-weight: 600;
-            padding: 10px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-        }
-        [data-testid="stDownloadButton"] button:hover {
-            background: linear-gradient(135deg, #FF9671 0%, #FFC75F 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 8px 15px -3px rgba(255, 150, 113, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* 状态提示框美化 */
-        .stAlert {
-            background-color: #FFFFFF;
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            border-left: 4px solid #845EC2;
+            background: white;
+            border: 1px solid #E5E5E5;
+            border-radius: 16px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
         
-        /* 进度条颜色 */
+        /* 进度条 */
         .stProgress > div > div > div > div {
-            background: linear-gradient(90deg, #845EC2, #D65DB1, #FF9671);
+            background: linear-gradient(90deg, #FF8F70, #9F4F8A);
         }
+        
+        /* 隐藏顶部默认装饰条 */
+        header {visibility: hidden;}
         </style>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# 🧩 Mock Logic (逻辑层)
+# 🧩 Mock Logic
 # ==========================================
 class MockProcessor:
     def __init__(self, raw, bench):
@@ -821,89 +772,73 @@ class MockProcessor:
 
     def run_pipeline(self):
         time.sleep(1.5)
-        self.merged_dfs = {"Overview": pd.DataFrame({'A': [1,2], 'B': [3,4]})}
-        self.final_json = {"status": "success", "score": 98}
+        self.merged_dfs = {"Overview": pd.DataFrame({'Metric': [1,2], 'Value': [3,4]})}
+        self.final_json = {"status": "success"}
 
 # ==========================================
 # 🚀 主程序
 # ==========================================
 def main():
-    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="📊")
-    set_artistic_style()
+    st.set_page_config(page_title="Ad-Opt System", layout="wide", page_icon="✨")
+    set_aurora_style()
 
-    # --- Header ---
-    c1, c2 = st.columns([0.1, 0.9])
-    with c1:
-        st.title("广告优化报告数据生产系统")
+    # --- Header (高度居中，模仿搜索页) ---
+    # 使用空的 container 增加顶部留白，让内容视觉居中
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    # 艺术分割线
-    st.markdown('<div class="art-divider"></div>', unsafe_allow_html=True)
+    st.title("What can I help with?")
+    st.markdown('<div class="subtitle">请上传您的数据报表，我将为您生成全维度的分析报告。</div>', unsafe_allow_html=True)
 
-    # --- Guide Section (自定义 HTML 结构) ---
-    st.markdown("""
-        <div class="guide-card">
-            <div class="guide-title">⚡ 功能使用指南 / USER GUIDE</div>
-            <ul style="list-style-type: square; padding-left: 20px; color: #444; font-family: monospace;">
-                <li style="margin-bottom: 8px;">请上传 <strong>[周期性复盘报告]</strong> 与 <strong>[行业 Benchmark]</strong> 源文件。</li>
-                <li style="margin-bottom: 8px;">系统将自动执行：数据清洗 -> ETL处理 -> 大模型架构生成。</li>
-                <li>输出包含：JSON (AI分析用)、Excel (透视用)、Word (审查用)。</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
+    # --- Upload Area (模仿卡片布局) ---
+    # 使用 columns 来限制宽度，保持中央聚焦感
+    # 比例：空 - 卡片1 - 间隔 - 卡片2 - 空
+    c_pad1, c_card1, c_gap, c_card2, c_pad2 = st.columns([1, 4, 0.5, 4, 1])
 
-    # --- Input Section ---
-    col1, col2 = st.columns(2, gap="large")
+    with c_card1:
+        # 添加图标装饰
+        st.markdown("<div style='text-align:center; font-size:2rem; margin-bottom:10px;'>📊</div>", unsafe_allow_html=True)
+        f1 = st.file_uploader("上传数据报表 (Excel)", type=["xlsx", "xls"], key="f1")
 
-    with col1:
-        st.markdown('<div class="section-header"><span>1️⃣ 数据源输入</span></div>', unsafe_allow_html=True)
-        f1 = st.file_uploader("上传 [数据报表] (Excel)", type=["xlsx", "xls"], key="f1")
-        if f1:
-            st.markdown(f"<div style='color:#00D1FF; font-weight:bold; margin-top:5px;'>✔ 已加载: {f1.name}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown("<div style='color:#999; font-size:0.8rem; margin-top:5px;'>等待上传...</div>", unsafe_allow_html=True)
-
-    with col2:
-        st.markdown('<div class="section-header"><span>2️⃣ 行业基准</span></div>', unsafe_allow_html=True)
-        f2 = st.file_uploader("上传 [行业 Benchmark]", type=["xlsx", "xls"], key="f2")
-        if f2:
-            st.markdown(f"<div style='color:#00D1FF; font-weight:bold; margin-top:5px;'>✔ 已加载: {f2.name}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown("<div style='color:#999; font-size:0.8rem; margin-top:5px;'>可选 (若无则使用默认基准)</div>", unsafe_allow_html=True)
+    with c_card2:
+        st.markdown("<div style='text-align:center; font-size:2rem; margin-bottom:10px;'>🎯</div>", unsafe_allow_html=True)
+        f2 = st.file_uploader("上传行业 Benchmark", type=["xlsx", "xls"], key="f2")
 
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # --- Action Area ---
-    # 居中布局
-    _, btn_col, _ = st.columns([1, 1.5, 1])
+    # --- Action Area (居中) ---
+    _, btn_col, _ = st.columns([5, 2, 5])
     with btn_col:
-        start = st.button("🚀 开始处理数据 / START PROCESS")
+        start = st.button("开始生成报告 ✦")
 
     # --- Processing ---
     if start:
         if not f1:
-            st.error("⚠️ 缺少核心数据源！MISSING DATA SOURCE")
+            st.warning("请先上传主数据报表")
         else:
             processor = MockProcessor(f1, f2)
             
-            # 自定义进度条容器
-            with st.status("🔮 正在进行数据炼金术...", expanded=True) as status:
-                st.write("✨ 清洗脏数据...")
+            # 极简状态显示
+            with st.status("正在进行 AI 分析...", expanded=True) as status:
+                st.write("提取关键指标...")
                 time.sleep(0.8)
-                st.write("🔥 融合基准指标...")
-                time.sleep(0.8)
+                st.write("生成架构洞察...")
                 processor.run_pipeline()
-                status.update(label="✅ 处理完成 / COMPLETED", state="complete", expanded=False)
+                status.update(label="分析完成", state="complete", expanded=False)
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown('<div class="section-header"><span>3️⃣ 结果下载 / DOWNLOAD</span></div>', unsafe_allow_html=True)
-
-            d1, d2, d3 = st.columns(3, gap="medium")
+            st.divider()
+            
+            # 结果下载 - 居中排列
+            st.markdown("<div style='text-align:center; margin-bottom:20px; font-weight:600; color:#555;'>您的文件已准备就绪</div>", unsafe_allow_html=True)
+            
+            # 使用较窄的居中列来放下载按钮
+            _, d1, d2, d3, _ = st.columns([2, 2, 2, 2, 2])
             with d1:
-                st.download_button("💾 下载 JSON", data="{}", file_name="data.json", use_container_width=True)
+                st.download_button("JSON 结构", data="{}", file_name="data.json", use_container_width=True)
             with d2:
-                st.download_button("📊 下载 Excel", data=b"xls", file_name="data.xlsx", use_container_width=True)
+                st.download_button("Excel 透视", data=b"xls", file_name="data.xlsx", use_container_width=True)
             with d3:
-                st.download_button("📝 下载 Word", data=b"doc", file_name="report.docx", use_container_width=True)
+                st.download_button("Word 报告", data=b"doc", file_name="report.docx", use_container_width=True)
 
 if __name__ == "__main__":
     main()
