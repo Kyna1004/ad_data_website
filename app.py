@@ -868,7 +868,7 @@ def main():
     # --- Action Button (Centered) ---
     b_c1, b_c2, b_c3 = st.columns([1, 1, 1])
     with b_c2:
-        start_btn = st.button("开始生成报告 ✦", use_container_width=True)
+        start_btn = st.button("开始处理数据 ✦", use_container_width=True)
 
     # --- Logic ---
     if start_btn:
