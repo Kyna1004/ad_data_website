@@ -47,7 +47,8 @@ SHEET_MAPPINGS = {
         **COMMON_METRICS,
         "date_range": ["时间范围", "Day", "Date"],
         "landing_page_views": ["落地页浏览量", "Landing Page Views"],
-        "add_to_cart": ["加入购物车", "加购", "Add to Cart", "Website Adds to Cart"],
+        # ✅ 修改点：确保这里包含【加入购物车】以及其他变体
+        "add_to_cart": ["加入购物车", "加购", "Add to Cart", "Website Adds to Cart", "网站加购", "Adds to Cart"],
         "initiate_checkout": ["结账发起次数", "Initiate Checkout"],
         "rate_click_to_lp": ["点击-落地页浏览转化率"],
         "rate_lp_to_atc": ["落地页浏览-加购转化率"],
@@ -120,13 +121,14 @@ FIELD_ALIASES = {
     "clicks": ["clicks", "clicks (all)", "点击量", "clicks_all"],
     "impressions": ["impressions", "展示", "展现"],
     "ctr_all": ["ctr_all", "ctr (all)", "点击率 (all)"],
-    "add_to_cart": ["add_to_cart", "加入购物车", "加购", "cart", "website adds to cart"], # 增加 alias
+    # ✅ 修改点：增加 "网站加购", "adds to cart" 以防万一
+    "add_to_cart": ["add_to_cart", "加入购物车", "加购", "cart", "website adds to cart", "网站加购", "adds to cart"], 
     "initiate_checkout": ["initiate_checkout", "结账发起次数", "结账", "checkout"],
     "landing_page_views": ["landing_page_views", "落地页浏览量", "落地页", "landing"]
 }
 
 # ==========================================
-# PART 2: 核心工具函数 (保持不变，略微优化 safe_div)
+# PART 2: 核心工具函数
 # ==========================================
 
 def parse_float(value):
@@ -195,6 +197,7 @@ def calc_metrics_dict(df_chunk):
         if t == 'purchase_value' and 'value' not in aliases: aliases.append('value')
         col = find_column_fuzzy(df_chunk, aliases)
         if col:
+             # 直接读取列值并求和 (对于单行就是直接读取)
              sums[t] = df_chunk[col].apply(clean_numeric_strict).sum()
         else:
              sums[t] = 0.0
@@ -204,6 +207,7 @@ def calc_metrics_dict(df_chunk):
     res['clicks'] = parse_float(sums.get('clicks', 0))
     res['purchases'] = parse_float(sums.get('purchases', 0))
     res['purchase_value'] = parse_float(sums.get('purchase_value', 0))
+    # ✅ 这里直接读取，不进行公式计算
     res['add_to_cart'] = parse_float(sums.get('add_to_cart', 0))
     res['initiate_checkout'] = parse_float(sums.get('initiate_checkout', 0))
     res['landing_page_views'] = parse_float(sums.get('landing_page_views', 0))
@@ -332,7 +336,7 @@ def add_df_to_word(doc, df, title, level=1):
     doc.add_paragraph("\n")
 
 # ==========================================
-# PART 3: 主逻辑类 (Process ETL 修改重点)
+# PART 3: 主逻辑类
 # ==========================================
 
 class AdReportProcessor:
@@ -365,7 +369,6 @@ class AdReportProcessor:
                 df.columns = [str(c).strip() for c in df.columns]
                 
                 final_cols = {}
-                # ✅ 修正逻辑：更稳健的列匹配
                 for std_col, raw_col_options in mapping.items():
                     matched_col = None
                     # 1. 精确/Case-Insensitive 匹配
@@ -533,7 +536,7 @@ class AdReportProcessor:
                     self.final_json['2_industry_benchmark'] = df_b.to_dict(orient='records')
                 except Exception as e: st.warning(f"大盘计算警告: {e}")
 
-        # 3. 受众组 (代码逻辑保持原样，略去不展示以节省空间，功能无影响)
+        # 3. 受众组
         self.generate_audience_section()
         # 4. 素材与落地页
         self.generate_creative_section()
@@ -542,7 +545,6 @@ class AdReportProcessor:
         # 7. 架构诊断
         self.generate_structure_section()
 
-    # (为了简洁，我将后续未变动的函数折叠在类方法中，你可直接保留原有的后续逻辑)
     def generate_audience_section(self):
         self.doc.add_heading("3. 受众组分析", level=1)
         self.final_json['3_audience_analysis'] = {}
@@ -567,18 +569,18 @@ class AdReportProcessor:
                 mask = df_cr['Source_Sheet'].astype(str).apply(lambda x: any(k in x for k in keywords))
                 df_curr = df_cr[mask].copy()
                 if not df_curr.empty:
-                     # 简单的CPC/CTR补全逻辑，同原代码
-                     if not find_column_fuzzy(df_curr, ['cpc']): df_curr['cpc'] = df_curr['spend'] / df_curr['clicks'].replace(0, np.nan) if 'clicks' in df_curr else 0
-                     if not find_column_fuzzy(df_curr, ['cpa']): df_curr['cpa'] = df_curr['spend'] / df_curr['purchases'].replace(0, np.nan) if 'purchases' in df_curr else 0
-                     if not find_column_fuzzy(df_curr, ['ctr']): df_curr['ctr'] = (df_curr['clicks'] / df_curr['impressions'].replace(0, np.nan)) * 100 if 'impressions' in df_curr else 0
-                     else: df_curr['ctr'] = df_curr['ctr'] * 100
-                     
-                     req_cols = ["content_item", "spend", "ctr", "cpc", "cpm", "roas", "cpa"]
-                     df_final = self.standardize_cols(df_curr, req_cols)
-                     if 'spend' in df_final.columns: df_final = df_final.sort_values('spend', ascending=False).head(10)
-                     df_display = apply_report_labels(df_final.round(2), custom_mapping={'content_item': label})
-                     add_df_to_word(self.doc, df_display, title, level=1)
-                     self.final_json[json_key] = df_display.to_dict(orient='records')
+                      # 简单的CPC/CTR补全逻辑，同原代码
+                      if not find_column_fuzzy(df_curr, ['cpc']): df_curr['cpc'] = df_curr['spend'] / df_curr['clicks'].replace(0, np.nan) if 'clicks' in df_curr else 0
+                      if not find_column_fuzzy(df_curr, ['cpa']): df_curr['cpa'] = df_curr['spend'] / df_curr['purchases'].replace(0, np.nan) if 'purchases' in df_curr else 0
+                      if not find_column_fuzzy(df_curr, ['ctr']): df_curr['ctr'] = (df_curr['clicks'] / df_curr['impressions'].replace(0, np.nan)) * 100 if 'impressions' in df_curr else 0
+                      else: df_curr['ctr'] = df_curr['ctr'] * 100
+                      
+                      req_cols = ["content_item", "spend", "ctr", "cpc", "cpm", "roas", "cpa"]
+                      df_final = self.standardize_cols(df_curr, req_cols)
+                      if 'spend' in df_final.columns: df_final = df_final.sort_values('spend', ascending=False).head(10)
+                      df_display = apply_report_labels(df_final.round(2), custom_mapping={'content_item': label})
+                      add_df_to_word(self.doc, df_display, title, level=1)
+                      self.final_json[json_key] = df_display.to_dict(orient='records')
 
     def generate_placement_section(self):
          if "Master_Breakdown" in self.merged_dfs:
@@ -625,7 +627,7 @@ class AdReportProcessor:
         self.final_json[json_section][title] = df_display.to_dict(orient='records')
 
 # ==========================================
-# PART 4: Streamlit UI (保持不变)
+# PART 4: Streamlit UI
 # ==========================================
 def main():
     st.set_page_config(page_title="Auto-ad-data", layout="wide")
