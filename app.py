@@ -13,7 +13,7 @@ import docx.opc.constants
 import time
 
 # ==========================================
-# PART 1: 配置区域 (保持不变)
+# PART 1: 配置区域
 # ==========================================
 
 COMMON_METRICS = {
@@ -35,7 +35,7 @@ SHEET_MAPPINGS = {
         "date_range": ["时间范围"],
         "clicks_all": ["点击"],
         "landing_page_views": ["落地页浏览量"],
-        "add_to_cart": ["加入购物车", "加购", "Add to Cart"], # ✅ 确保映射
+        "add_to_cart": ["加入购物车", "加购", "Add to Cart"], 
         "initiate_checkout": ["结账发起次数", "结账", "Initiate Checkout"],
         "rate_click_to_lp": ["点击-落地页浏览转化率"],
         "rate_lp_to_atc": ["落地页浏览-加购转化率"],
@@ -126,7 +126,7 @@ FIELD_ALIASES = {
 
 
 # ==========================================
-# PART 2: 核心工具函数 (保持上一次修复的状态)
+# PART 2: 核心工具函数
 # ==========================================
 
 def parse_float(value):
@@ -336,11 +336,27 @@ class AdReportProcessor:
         self.final_json = {}
         self.doc = Document()
 
+    # ✅ 辅助函数：模糊匹配 Sheet 名称
+    def find_sheet_fuzzy(self, target, actual_sheets):
+        # 1. 精确匹配（去除首尾空格）
+        for actual in actual_sheets:
+            if target.strip().lower() == actual.strip().lower():
+                return actual
+        # 2. 包含匹配
+        for actual in actual_sheets:
+            if target in actual:
+                return actual
+        return None
+
     def process_etl(self):
         xls = pd.ExcelFile(self.raw_file)
-        for sheet_name, mapping in SHEET_MAPPINGS.items():
-            if sheet_name in xls.sheet_names:
-                df = pd.read_excel(xls, sheet_name=sheet_name)
+        
+        # ✅ 使用模糊匹配查找 Sheet
+        for config_sheet_name, mapping in SHEET_MAPPINGS.items():
+            actual_sheet_name = self.find_sheet_fuzzy(config_sheet_name, xls.sheet_names)
+            
+            if actual_sheet_name:
+                df = pd.read_excel(xls, sheet_name=actual_sheet_name)
                 final_cols = {}
                 for std_col, raw_col_options in mapping.items():
                     matched_col = None
@@ -362,12 +378,13 @@ class AdReportProcessor:
                         if col not in text_cols:
                             df_clean[col] = df_clean[col].apply(clean_numeric)
 
-                    if sheet_name in ["素材", "落地页", "受众组"]:
+                    if config_sheet_name in ["素材", "落地页", "受众组"]:
                         if "spend" in df_clean.columns:
                             df_clean = df_clean.sort_values("spend", ascending=False).head(10)
 
-                    df_clean["Source_Sheet"] = sheet_name
-                    self.processed_dfs[sheet_name] = df_clean
+                    # ✅ 强制将 Source_Sheet 统一为配置中的标准名（如 "整体数据"），方便后续查找
+                    df_clean["Source_Sheet"] = config_sheet_name
+                    self.processed_dfs[config_sheet_name] = df_clean
 
         for master_name, source_sheets in GROUP_CONFIG.items():
             dfs_to_merge = [self.processed_dfs[src] for src in source_sheets if src in self.processed_dfs]
@@ -409,13 +426,11 @@ class AdReportProcessor:
                     raw_overall = calc_metrics_dict(df_clean)
                     
                     # ======================================================
-                    # ✅ [FIX] 强制使用【整体数据】Sheet 中的值覆盖计算值
+                    # ✅ [FIXED & ROBUST] 强制使用【整体数据】Sheet 中的值覆盖计算值
                     # ======================================================
-                    # 原因：分时段数据可能缺少加购/结账等字段，导致累加为0。
-                    # 而【整体数据】Sheet通常包含准确的汇总值。
                     if "Master_Overview" in self.merged_dfs:
                          df_all = self.merged_dfs["Master_Overview"]
-                         # 找到 Source_Sheet 是 "整体数据" 的行
+                         # 因为在 process_etl 中已经统一了 Source_Sheet 为标准名，这里可以直接匹配
                          mask_summary = df_all['Source_Sheet'] == "整体数据"
                          df_summary = df_all[mask_summary]
                          
